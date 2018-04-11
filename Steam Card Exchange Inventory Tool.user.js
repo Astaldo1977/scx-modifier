@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         Steam Card Exchange Inventory Tool
+// @name         Steam Card Exchange Inventory Helper
 // @namespace    https://www.steamgifts.com/user/astaldo
 // @version      0.0.1
 // @description  Only show the good hits
@@ -8,11 +8,12 @@
 // @grant        GM_xmlhttpRequest
 // @connect      self
 // @require      https://code.jquery.com/jquery-3.3.1.min.js
-// @updateURL    https://raw.githubusercontent.com/Astaldo1977/scx-modifierd/master/Steam%20Card%20Exchange%20Inventory%20Tool.user.js
+// @updateURL    https://raw.githubusercontent.com/Astaldo1977/scx-modifier/master/Steam%20Card%20Exchange%20Inventory%20Tool.user.js
 // @downloadURL  https://raw.githubusercontent.com/Astaldo1977/scx-modifier/master/Steam%20Card%20Exchange%20Inventory%20Tool.user.js
 // ==/UserScript==
 
 function parseData(responseData){
+    document.documentElement.innerHTML = '<table border="0" id="overview"></table>';
     var jsonData = jQuery.parseJSON(responseData).data;
 
     jsonData = jQuery.grep(jsonData, function( item ) {
@@ -28,28 +29,27 @@ function parseData(responseData){
         return true;
     });
     $.each(jsonData, function( index, item) {
-        console.log(item[0][1]);
+        var tableRow = document.createElement('tr');
+        var tdName = document.createElement('td');
+        var tdCardPrice = document.createElement('td');
+        var tdCardsInSet = document.createElement('td');
+
+        tdName.innerText =item[0][1];
+        tdCardPrice.innerText =item[1];
+        tdCardsInSet.innerText = item[3][0];
+
+        tableRow.append(tdName);
+        tableRow.append(tdCardPrice);
+        tableRow.append(tdCardsInSet);
+        $('#overview').append(tableRow);
     });
-}
-function parseSingleElement(item){
-    console.log(item);
-    var setsAvailable = item[3][2];
-    if(setsAvailable <= 1) return;
-
-    var cardPrice = item[1];
-    if(cardPrice > 6) return;
-
-    var cardsInSet = item[3][0];
-    if(cardsInSet > 6) return;
-
-    var name = item[0][1];
-    console.log(name);
 }
 var errorFunction = function(response) {
     console.log("Error details: ", response.status, response.responseText);
 };
 (function() {
     'use strict';
+
     GM_xmlhttpRequest({
         "method": "GET",
         "url": "https://www.steamcardexchange.net/api/request.php?GetInventory",
